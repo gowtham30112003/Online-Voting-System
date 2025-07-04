@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_styles.css') }}">
+    <style>
+        /* Navbar styling */
+        nav {
+            background-color: #333;
+            padding: 10px;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Canvas size styling */
+        canvas#resultsChart {
+            width: 100%;
+            height: 300px;
+            max-width: 500px;
+            margin: auto;
+            display: block;
+        }
+
+        /* Center the content */
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <a href="{{ url_for('add_candidates') }}">Add Candidates</a>
+        <a href="javascript:void(0);" id="viewResultsBtn">View Results</a> <!-- View Results Button -->
+        <a href="{{ url_for('admin_logout') }}">Logout</a>
+    </nav>
+
+    <div class="container">
+        <h2>Welcome, {{ session['admin_username'] }} (Admin)</h2>
+
+        <div id="resultsSection" style="display: none;"> <!-- Results section hidden initially -->
+            <h2>Election Results</h2>
+            <table border="1" style="width: 100%; margin: 20px auto;">
+                <tr>
+                    <th>Candidate Name</th>
+                    <th>Party</th>
+                    <th>Votes</th>
+                    <th>Actions</th> <!-- New Column for Edit & Delete -->
+                </tr>
+                <tbody id="candidatesTableBody"></tbody> <!-- Dynamic candidates table -->
+            </table>
+
+            <h2>Election Results Visualization</h2>
+            <div style="max-width: 500px; height: 300px; margin: auto;">
+                <canvas id="resultsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Show results when the View Results button is clicked
+        document.getElementById("viewResultsBtn").addEventListener("click", function() {
+            fetch('/get_results')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error fetching results: ' + data.error);
+                    } else {
+                        // Show the results section
+                        document.getElementById("resultsSection").style.display = "block";
+
+                        // Populate the candidates table
+                        let tableBody = document.getElementById("candidatesTableBody");
+                        tableBody.innerHTML = ''; // Clear existing rows
+                        data.forEach(candidate => {
+                            let row = document.createElement("tr");
+                            row.innerHTML = `
+                                <td>${candidate.name}</td>
+                                <td>${candidate.party}</td>
+                                <td>${candidate.votes}</td>
+                                <td>
+                                    <a href="/edit_candidate/${candidate.id}">Edit</a> |
+                                    <a href="/delete_candidate/${candidate.id}" onclick="return confirm('Are you sure you want to delete this candidate?');">Delete</a>
+                                </td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+
+                        // Prepare data for chart
+                        var candidateNames = data.map(candidate => candidate.name);
+                        var voteCounts = data.map(candidate => candidate.votes);
+
+                        // Render the chart
+                        var ctx = document.getElementById('resultsChart').getContext('2d');
+                        var resultsChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: candidateNames,
+                                datasets: [{
+                                    label: 'Votes',
+                                    data: voteCounts,
+                                    backgroundColor: ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#9C27B0'],
+                                    borderColor: '#333',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false, // Allow custom height/width
+                                scales: {
+                                    y: { beginAtZero: true }
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    alert('An error occurred: ' + error.message);
+                });
+        });
+    </script>
+</body>
+</html>

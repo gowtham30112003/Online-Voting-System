@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Candidates</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Add Candidate</h2>
+        <form action="{{ url_for('add_candidates') }}" method="POST">
+            <label for="name">Candidate Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="party">Party Name:</label>
+            <input type="text" id="party" name="party" required>
+
+            <button type="submit">Add Candidate</button>
+        </form>
+        <br>
+        <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+    </div>
+</body>
+</html>
