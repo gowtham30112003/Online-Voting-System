@@ -47,4 +47,13 @@ A secure online voting system built using \*\*Flask\*\*, \*\*MySQL\*\*, \*\*AES 
 &nbsp;  pip install -r requirements.txt
 
 
+## 🧪 Running the Project Locally
+
+```bash
+git clone https://github.com/gowtham30112003/Online-Voting-System.git
+cd Online-Voting-System
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
 
